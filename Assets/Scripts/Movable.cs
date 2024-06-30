@@ -1,68 +1,97 @@
-﻿using System;
+﻿using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class Movable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
-    private Vector3 offset;
+    private Vector3 _offset;
     [SerializeField] private LayerMask mask;
-    private Vector3 firstPosition;
+
+    private Transform _currentMovable;
+    private Vector3 _homePosition;
+    private MyTile _myTile;
+    private Piece _piece;
 
     private void Start()
     {
-        firstPosition = transform.position;      
+        _currentMovable = transform.parent;
+        _homePosition = transform.position;
+        _myTile = GetComponent<MyTile>();
+        _piece = transform.parent.GetComponent<Piece>();
     }
-    public void OnDrag(PointerEventData eventData)
-    {
-        var target = Camera.main.ScreenToWorldPoint(eventData.position);
-        target += offset;
-        target.z = 0;
-        transform.position = target;
-    }
+
+    #region Pointer
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        var target = Camera.main.ScreenToWorldPoint(eventData.position);
-        offset = transform.position - target;
+        _piece.OnPointerDown();
+        SetOffset(eventData);
+    }
 
+    private void SetOffset(PointerEventData eventData)
+    {
+        var target = Camera.main.ScreenToWorldPoint(eventData.position);
+        _offset = _currentMovable.position - target;
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        Move(eventData);
+    }
+
+    private void Move(PointerEventData eventData)
+    {
+        var target = Camera.main.ScreenToWorldPoint(eventData.position);
+        target += _offset;
+        target.z = 0;
+        _currentMovable.position = target;
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        var hit = Hit();
-        if (hit)
-        {
-            Vector3 newPosition = new Vector3(hit.transform.position.x, hit.transform.position.y, -2f);
-            transform.position = newPosition;
-        }
-        else
-        {
-            BackToPosition();
-        }
+        _piece.OnPointerUp();
     }
 
-    private void BackToPosition()
+    #endregion
+
+
+    public void SetPositionToHit()
     {
-        transform.position = firstPosition;
+        var hit = Hit();
+        var baseTile = hit.transform.GetComponent<MyTile>();
+        baseTile.OnMyTile = _myTile;
+        var target = hit.transform.position;
+        target.z = 0.5f;
+        _myTile.SetActiveCollider(false);
+
+         //transform.position = target;
+        Animation(target, .3f);
     }
 
-    private RaycastHit2D Hit()
+    public void BackHome()
+    {
+        //transform.position = _homePosition;
+        Animation(_homePosition, .3f);
+    }
+
+    public RaycastHit2D Hit()
     {
         var origin = transform.position;
-        origin.z += .5f;
-        RaycastHit2D hit2D = Physics2D.Raycast(transform.position, Vector3.forward, 10, mask);
-        return hit2D;
-
-        //if (hit2D)
-        //{
-        //    Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * 1000, Color.blue);
-        //    Debug.Log("Did Hit");
-        //}
-        //else
-        //{
-        //    Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * 1000, Color.white);
-        //    Debug.Log("Did not hit");
-
-        //}
+        return Physics2D.Raycast(origin, Vector3.forward, 10, mask);
     }
+
+    private async void Animation(Vector3 target, float duration)
+    {
+        var init = transform.position;
+        var passed = 0f;
+        while (passed < duration)
+        {
+            passed += Time.deltaTime;
+            var normalize = passed / duration;
+            var current = Vector3.Lerp(init, target, normalize);
+            transform.position = current;
+            await Task.Yield();
+        }
+    }
+
 }
