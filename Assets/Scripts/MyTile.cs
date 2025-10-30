@@ -7,6 +7,8 @@ public class MyTile : TileController
 {
     public Movable Movable { get; private set; }
     public MyTile OnMyTile { get; set; }
+    public bool IsOnTile = false;
+
 
     private SpriteRenderer _outline;
     private Collider2D _collider;
@@ -30,7 +32,7 @@ public class MyTile : TileController
 
     public async void Destroy(float delay)
     {
-        await Scale(Vector3.zero, .5f, delay);
+        await Scale(Vector3.forward, .5f, delay);
         Destroy(gameObject);
     }
 

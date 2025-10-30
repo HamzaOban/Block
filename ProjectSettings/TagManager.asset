@@ -3,7 +3,11 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - ScoreManager
+  - Canvas
+  - GameOverManager
+  - AdManager
   layers:
   - Default
   - TransparentFX
@@ -14,8 +18,8 @@ TagManager:
   - 
   - 
   - BaseTile
-  - 
-  - 
+  - Panel
+  - Canvas
   - 
   - 
   - 
@@ -40,4 +44,22 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Settings
+    uniqueID: 1123147335
+    locked: 0
+  - name: Grid
+    uniqueID: 2995675033
+    locked: 0
+  - name: Panel
+    uniqueID: 3143527609
+    locked: 0
+  - name: GameOverPanel
+    uniqueID: 2643149065
+    locked: 0
+  - name: Canvas
+    uniqueID: 1055303159
+    locked: 0
+  - name: GameOverManager
+    uniqueID: 3091465315
     locked: 0
